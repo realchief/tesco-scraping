@@ -7,6 +7,8 @@ import scrapy
 import json
 from scrapy.item import Item, Field
 from scrapy import FormRequest
+import requests
+from scrapy import Selector
 
 
 class SiteProductItem(Item):
@@ -33,6 +35,121 @@ class TesscoScraper (scrapy.Spider):
     settings.overrides['ROBOTSTXT_OBEY'] = False
     USER_NAME = 'accounting@sellnetny.com'
     PASSWORD = 'Max@302'
+
+    AQ = '(@syssource==("Coveo_web_index - SCRBLUE-SCRCM01-Sitecore8") NOT @ftemplateid51937==' \
+         '("adb6ca4f-03ef-4f47-b9ac-9ce2ba53ff97","fe5dd826-48c6-436d-b87a-7c4210c7413b")) ' \
+         '(@fstatus51937<>ObsoleteOutOfStock) (@fisz32xdiscontinued51937==0) (@fisez120xposedonweb51937==(1,Yes)) ' \
+         '(@fitemtype51937<>(LABOR,PRICING)) (@fsellingrestrictioncode51937==' \
+         '("N/A",1MPH,ADOP,AKGS,AUGL,BAN5,BAN6,BINA,BLUE,BODZ,BOND,BRTH,BRVN,C100,CANO,CL3M,CMEC,CMES,CRIK,DEMO,DSP2,' \
+         'ELEM,ELIT,EVUT,EXA1,FRT1,FTTH,GEAR,GHCC,GIGA,GOLF,GOOG,GR4B,GRFN,HOLD,HUAW,IBLT,ICOM,INCP,INHC,JABR,JAWB,' \
+         'JLAB,KING,KRNZ,KSC2,LAND,LFLX,LIFE,LIFP,MACZ,METR,METT,MOSH,MSFT,MSII,MSIO,MUSE,MWLN,MYCH,NATU,NEET,NEST,' \
+         'NOMA,NONO,NSC1,NSC2,NSC3,NSC4,OBSS,OTTC,PLNA,PLNB,POPS,PRRT,RAJ,RAJ1,RDL1,REPS,SAMA,SAMC,SAMD,SAMM,SAMX,SC15' \
+         ',SCOS,SENA,SKEC,SKUL,SLC,SOLR,SONA,SONX,SPAW,SPCK,SPEL,SPHM,SQRE,SSC2,SSC3,STAY,SUIT,SWCM,TEDB,TMOB,TMTM,TNL1' \
+         ',TWEL,UAGR,URBN,VINE,VNV1,VOIP,WEMO,ZEPP,ZIK1)) (@fcategories51937*="dbae02fc-1e79-7dbb-f118-decf9a10503e*")'
+
+    CQ = '((@fz95xlanguage51937=="en" @fz95xlatestversion51937=="1")) (@fz95xtemplatename51937==Product) ' \
+         '(@fisz32xactive51937==1)'
+
+    GROUP_BY = '[{"field":"@fcategories51937","maximumNumberOfValues":1000,"sortCriteria":"occurrences",' \
+               '"injectionDepth":1000,"completeFacetWithStandardValues":true},{"field":"@fisonsale51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":false,"allowedValues":["Yes"]},{"field":"@fmanufacturername51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fpurchaseplans51937","maximumNumberOfValues":6,' \
+               '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+               '{"field":"@fcatitemrfconnectorbodystylest51937","maximumNumberOfValues":6,"sortCriteria":' \
+               '"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+               '{"field":"@fcatitemwiregaugest51937","maximumNumberOfValues":6,"sortCriteria":"alphaAscending",' \
+               '"injectionDepth":10000,"completeFacetWithStandardValues":true},{"field":"@fcatitemconfiguration51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemvolumecapacityminimumst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemvopst51937","maximumNumberOfValues":6,' \
+               '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+               '{"field":"@fcatitemouterconductormaterialst51937","maximumNumberOfValues":6,' \
+               '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+               '{"field":"@fcatitemshieldedst51937","maximumNumberOfValues":6,"sortCriteria":"alphaAscending",' \
+               '"injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+               '{"field":"@fcatitemoutercontactattachtypest51937","maximumNumberOfValues":6,' \
+               '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+               '{"field":"@fcatitemfireratingst51937","maximumNumberOfValues":6,"sortCriteria":"alphaAscending",' \
+               '"injectionDepth":10000,"completeFacetWithStandardValues":true},{"field":"@fcatitemarmoredst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcontactsurface51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcolorst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemfinish51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemjacketcolorst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemnetworkconnectorsst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemrfconnectorst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcablemanufacturerst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcablesiz122xest51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemmaterialpin51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcoaz120xialcableseriesst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitembodyattachmentst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemjacketmaterialst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemminimumbendradinsst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemjumperlengthst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemrfimpedancest51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemfireretardantst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemconnector1manufacturerst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemctrconductorconstructionst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemconnector2manufacturerst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemvolumecapacitymaz120ximumst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitembodymaterialst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatiteminsulatormaterialst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemrfconnectorsst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcabletypest51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemlowpimst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemacinputvoltagest51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemenvironmentst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemvoltagetype51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemnetworkcategoryst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemminimumbendradopst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemuvresistantst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcablelengthst51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@fcatitemcenterpintypest51937",' \
+               '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true},{"field":"@favailabledate51937",' \
+               '"maximumNumberOfValues":3,"sortCriteria":"occurrences","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true,"rangeValues":[{"start":"2018-12-21T23:00:00.000Z",' \
+               '"end":"2999-12-31T22:59:59.999Z","label":"60 Days","endInclusive":false},' \
+               '{"start":"2018-11-21T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z","label":"90 Days",' \
+               '"endInclusive":false},{"start":"1969-12-31T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z",' \
+               '"label":"All","endInclusive":false}]},{"field":"@fbrandmodelhierarchy51937",' \
+               '"maximumNumberOfValues":10001,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
+               '"completeFacetWithStandardValues":true}]'
 
     def __init__(self, **kwargs):
         self.headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) "
@@ -83,6 +200,31 @@ class TesscoScraper (scrapy.Spider):
         sitecoreItemUri = re.search('"sitecoreItemUri" : "(.*?)" ,', response.body).group(1)
         request_url = 'https://www.tessco.com/coveo/rest/v2/?sitecoreItemUri={sitecoreItemUri}&siteName=TesscoCommerce'\
             .format(sitecoreItemUri=sitecoreItemUri)
+        first_page_content = requests.post(request_url,
+                                           data={
+                                               'aq': self.AQ,
+                                               'cq': self.CQ,
+                                               'searchHub': page_name,
+                                               'language': 'en-US',
+                                               'firstResult': '0',
+                                               'numberOfResults': '25',
+                                               'excerptLength': '200',
+                                               'enableDidYouMean': 'true',
+                                               'sortCriteria': 'Relevancy',
+                                               'queryFunctions': '[]',
+                                               'rankingFunctions': '[]',
+                                               'groupBy': self.GROUP_BY,
+                                               'retrieveFirstSentences': 'true',
+                                               'timezone': 'Europe/Berlin',
+                                               'disableQuerySyntax': 'false',
+                                               'enableDuplicateFiltering': 'false',
+                                               'enableCollaborativeRating': 'false',
+                                               'debug': 'false',
+                                               'context': '{}'
+                                           })
+
+        page_count = int(first_page_content['totalCount'])
+
 
         page_links = []
         page_link = response.xpath('//span[@class="pagnLink"]/a/@href')[0].extract()
