@@ -2,6 +2,7 @@ from scrapy.conf import settings
 from urllib import urlencode
 from scrapy import Request
 from lxml import html
+import re
 import scrapy
 import json
 from scrapy.item import Item, Field
@@ -71,31 +72,17 @@ class TesscoScraper (scrapy.Spider):
 
     def parse_category(self, response):
 
-        category_links = []
         assert_category_links = response.xpath('//div[@class="thirdNav"]//ul[@class="unlisted"]/li/a/@href').extract()
         for assert_category_link in assert_category_links:
             category_link = self.START_URL + assert_category_link
-            category_links.append(category_link)
-
-        page_links = []
-        page_link = response.xpath('//span[@class="pagnLink"]/a/@href')[0].extract()
-        page_link_num = response.xpath('//span[@class="pagnLink"]/a/text()')[0].extract()
-        page_count = response.xpath('//span[@class="pagnDisabled"]/text()')[0].extract()
-
-        for page_num in range(1, int(page_count)):
-            page_list = page_link.replace('page={page_link_num}'.format(page_link_num=int(page_link_num)),
-                                          'page={page_num}'.format(page_num=page_num))
-            page_list = self.START_URL + page_list
-            page_links.append(page_list)
-
-        for p_link in page_links:
-            if 'https' in p_link:
-                sub_link = p_link
-            else:
-                sub_link = self.START_URL + p_link
-            yield Request(url=sub_link, callback=self.parse_page, dont_filter=True, headers=self.headers)
+            yield Request(url=category_link, callback=self.parse_page, dont_filter=True, headers=self.headers)
 
     def parse_page(self, response):
+
+        page_name = re.search('"pageName" : "(.*?)" ,', response.body).group(1)
+        sitecoreItemUri = re.search('"sitecoreItemUri" : "(.*?)" ,', response.body).group(1)
+        request_url = 'https://www.tessco.com/coveo/rest/v2/?sitecoreItemUri={sitecoreItemUri}&siteName=TesscoCommerce'\
+            .format(sitecoreItemUri=sitecoreItemUri)
 
         page_links = []
         page_link = response.xpath('//span[@class="pagnLink"]/a/@href')[0].extract()
