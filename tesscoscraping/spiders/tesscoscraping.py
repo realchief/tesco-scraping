@@ -9,6 +9,7 @@ from scrapy.item import Item, Field
 from scrapy import FormRequest
 import requests
 from scrapy import Selector
+from urllib import urlencode
 
 
 class SiteProductItem(Item):
@@ -20,10 +21,12 @@ class SiteProductItem(Item):
     QTY_UOM = Field()
     MFGPart = Field()
     Description = Field()
-    ListPrice = Field()
     Price = Field()
+    ListPrice = Field()
     InStock_OutOfStock = Field()
     Manufacturer = Field()
+    ImageURL = Field()
+    Length = Field()
 
 
 class TesscoScraper (scrapy.Spider):
@@ -32,6 +35,7 @@ class TesscoScraper (scrapy.Spider):
 
     START_URL = 'https://www.tessco.com'
     LOGIN_URL = 'https://www.tessco.com/api/tessco/session/login'
+    PRODUCT_URL = 'https://www.tessco.com/product/'
     settings.overrides['ROBOTSTXT_OBEY'] = False
     USER_NAME = 'accounting@sellnetny.com'
     PASSWORD = 'Max@302'
@@ -164,6 +168,7 @@ class TesscoScraper (scrapy.Spider):
                       )
 
     def login(self, response):
+
         yield FormRequest(url=self.LOGIN_URL,
                           callback=self.check_login,
                           headers=self.headers,
@@ -172,7 +177,8 @@ class TesscoScraper (scrapy.Spider):
                           formdata={
                               'UserName': self.USER_NAME,
                               'Password': self.PASSWORD
-                          }
+                          },
+                          meta=response.meta
                           )
 
     def check_login(self, response):
@@ -182,17 +188,22 @@ class TesscoScraper (scrapy.Spider):
             yield Request(url=self.START_URL,
                           callback=self.parse_category,
                           headers=self.headers,
-                          dont_filter=True
+                          dont_filter=True,
+                          meta=response.meta
                           )
         else:
-            print "login failed"
+            print ("login failed")
+
 
     def parse_category(self, response):
 
-        assert_category_links = response.xpath('//div[@class="thirdNav"]//ul[@class="unlisted"]/li/a/@href').extract()
-        for assert_category_link in assert_category_links:
-            category_link = self.START_URL + assert_category_link
-            yield Request(url=category_link, callback=self.parse_page, dont_filter=True, headers=self.headers)
+        if response.meta.has_key('url'):
+            yield Request(url=response.meta['url'], callback=self.parse_product, dont_filter=True, headers=self.headers)
+        else:
+            assert_category_links = response.xpath('//div[@class="thirdNav"]//ul[@class="unlisted"]/li/a/@href').extract()
+            for assert_category_link in assert_category_links:
+                category_link = self.START_URL + assert_category_link
+                yield Request(url=category_link, callback=self.parse_page, dont_filter=True, headers=self.headers, meta=response.meta)
 
     def parse_page(self, response):
 
@@ -223,84 +234,238 @@ class TesscoScraper (scrapy.Spider):
                                                'context': '{}'
                                            })
 
-        page_count = int(first_page_content['totalCount'])
+        page_count = json.loads(first_page_content.content)['totalCount']
+        page_number = int(page_count/25)
 
+        total_product_urls = []
+        # for page_index in range(0, page_number):
+        for page_index in range(0, 2):
 
-        page_links = []
-        page_link = response.xpath('//span[@class="pagnLink"]/a/@href')[0].extract()
-        page_link_num = response.xpath('//span[@class="pagnLink"]/a/text()')[0].extract()
-        page_count = response.xpath('//span[@class="pagnDisabled"]/text()')[0].extract()
+            first_result_num = str(25*page_index)
+            page_content = requests.post(request_url,
+                                         data={
+                                               'aq': self.AQ,
+                                               'cq': self.CQ,
+                                               'searchHub': page_name,
+                                               'language': 'en-US',
+                                               'firstResult': '0',
+                                               'numberOfResults': first_result_num,
+                                               'excerptLength': '200',
+                                               'enableDidYouMean': 'true',
+                                               'sortCriteria': 'Relevancy',
+                                               'queryFunctions': '[]',
+                                               'rankingFunctions': '[]',
+                                               'groupBy': self.GROUP_BY,
+                                               'retrieveFirstSentences': 'true',
+                                               'timezone': 'Europe/Berlin',
+                                               'disableQuerySyntax': 'false',
+                                               'enableDuplicateFiltering': 'false',
+                                               'enableCollaborativeRating': 'false',
+                                               'debug': 'false',
+                                               'context': '{}'
+                                           })
 
-        for page_num in range(1, int(page_count)):
-            page_list = page_link.replace('page={page_link_num}'.format(page_link_num=int(page_link_num)),
-                                          'page={page_num}'.format(page_num=page_num))
-            page_list = self.START_URL + page_list
-            page_links.append(page_list)
+            results = json.loads(page_content.content)['results']
+            for result in results:
+                title = result['Title']
+                page_link = self.PRODUCT_URL + title
+                if not page_link in total_product_urls:
+                    total_product_urls.append(page_link)
 
-        for p_link in page_links:
-            if 'https' in p_link:
-                sub_link = p_link
-            else:
-                sub_link = self.START_URL + p_link
-            yield Request(url=sub_link, callback=self.parse_data, dont_filter=True, headers=self.headers)
-
-
-    def parse_data(self, response):
-        li_list = response.xpath("//div[@id='mainResults']/.//ul/li [contains(@id, 'result')]")
-        for li in li_list:
-            link = li.xpath(".//div[contains(@class, 'a-spacing-mini')]//a[contains(@class,'s-access-detail-page')]/@href").extract()
-            try:
-                if link and 'http' in link[0]:
-                    yield Request(url=link[0],
-                                  callback=self.parse_product,
-                                  dont_filter=True,
-                                  headers=self.headers)
-
-            except Exception as e:
-                print (link[0])
+        for prod_url in total_product_urls:
+            yield Request(url=prod_url, callback=self.parse_product, dont_filter=True, headers=self.headers, meta=response.meta)
 
     def parse_product(self, response):
-        product = SiteProductItem()
+        if 'login' in response.url:
+            response.meta['url'] = response.url
+            self.login(response)
 
-        title = self._parse_title(response)
-        product['title'] = title
+        else:
+            product = SiteProductItem()
+            product['Url'] = response.url
 
-        brand = self._parse_brand(response)
-        product['brand'] = brand
+            CategoryTopology = self._parse_CategoryTopology(response)
+            product['CategoryTopology'] = CategoryTopology
 
-        price = self._parse_price(response)
-        product['price'] = price
+            Title = self._parse_Title(response)
+            product['Title'] = Title
 
-        original_price = self._parse_original_price(response)
-        product['original_price'] = original_price
+            TesscoSKU = self._parse_TesscoSKU(response)
+            product['TesscoSKU'] = TesscoSKU
 
-        yield product
+            UPC = self._parse_UPC(response)
+            product['UPC'] = UPC
+
+            QTY_UOM = self._parse_QTY_UOM(response)
+            product['QTY_UOM'] = QTY_UOM
+
+            MFGPart = self._parse_MFGPart(response)
+            product['MFGPart'] = MFGPart
+
+            Description = self._parse_Description(response)
+            product['Description'] = Description
+
+            Price = self._parse_Price(response)
+            product['Price'] = Price
+
+            ListPrice = self._parse_ListPrice(response)
+            product['ListPrice'] = ListPrice
+
+            InStock_OutOfStock = self._parse_InStock_OutOfStock(response)
+            product['InStock_OutOfStock'] = InStock_OutOfStock
+
+            Manufacturer = self._parse_Manufacturer(response)
+            product['Manufacturer'] = Manufacturer
+
+            Length = self._parse_Length(response)
+            product['Length'] = Length
+
+            ImageURL = self._parse_ImageURL(response)
+            product['ImageURL'] = ImageURL
+
+
+
+            yield product
 
     @staticmethod
-    def _parse_title(response):
-        title = response.xpath("//span[@id='productTitle']/text()").extract()
-        return title[0].strip() if title else None
+    def _parse_CategoryTopology(response):
+
+        path_words = response.xpath('//div[@class="container-fluid"]//ul[@class="unlisted inline"]//a/text()').extract()
+        category_topology = ''
+        for path_word in path_words:
+            category_topology = category_topology + '>' + path_word
+
+        return category_topology
 
     @staticmethod
-    def _parse_brand(response):
-        brand_info = response.xpath('//a[@id="brand"]/@href').extract()
-        if not brand_info:
-            brand_info = response.xpath('//a[@id="brand"]/text()').extract()
-        if not brand_info:
-            brand_info = response.xpath('//*[@id="by-line"]/.//a/text()').extract()
-        brand = None
-        if brand_info:
-            brand = brand_info[0].split('/')[1].split('/')[0]
-        return brand
+    def _parse_Title(response):
+        title = response.xpath('//div[@class="container-fluid productDetail"]//h2[@class="heavy"]/text()').extract()
+        return title[0] if title else None
 
     @staticmethod
-    def _parse_price(response):
-        price = response.xpath('//span[contains(@id,"priceblock")]/text()').extract()
-        return price[0].split('-')[0] if price else None
+    def _parse_TesscoSKU(response):
+        sku_info = re.search('TESSCO SKU:</span> (.*?)</li>', response.body).group(1)
+        return sku_info if sku_info else None
 
     @staticmethod
-    def _parse_original_price(response):
-        original_price = response.xpath('//span[contains(@class,"a-text-strike")]/text()').extract()
-        if not original_price:
-            original_price = response.xpath('//span[contains(@id,"priceblock")]/text()').extract()
-        return original_price[0].split('-')[0] if original_price else None
+    def _parse_UPC(response):
+        upc_info = re.search('UPC:</span> (.*?)</li>', response.body).group(1)
+        return upc_info if upc_info else None
+
+    @staticmethod
+    def _parse_QTY_UOM(response):
+        qty_uom = re.search('QTY/UOM:</span> (.*?)</li>', response.body).group(1)
+        return qty_uom if qty_uom else None
+
+    @staticmethod
+    def _parse_MFGPart(response):
+        mfp_part = re.search('MFG PART #:</span> (.*?)</li>', response.body).group(1)
+        return mfp_part if mfp_part else None
+
+    @staticmethod
+    def _parse_Description(response):
+        assert_description = response.xpath('//p[@class="more"]/text()').extract()
+        return assert_description[0] if assert_description else None
+
+    @staticmethod
+    def _parse_Price(response):
+        price = re.search('price:(.*?),', response.body).group(1).replace('"', '')
+        return price if price else None
+
+    @staticmethod
+    def _parse_ListPrice(response):
+        list_price = re.search('listPrice:(.*?),', response.body).group(1).replace('"', '')
+        return list_price if list_price else None
+
+    @staticmethod
+    def _parse_InStock_OutOfStock(response):
+
+        # sku = re.search('sku: (.*?),', response.body).group(1)
+        # status = None
+        # data = {'sku': sku}
+        # stock_url = 'https://www.tessco.com/api/tessco/inventory/getproductavailability'
+        # headers = {'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        #            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36',
+        #            'referer': response.url,
+        #            'x-requested-with': 'XMLHttpRequest',
+        #            'origin': 'https://www.tessco.com',
+        #            'accept': 'application/json, text/javascript, */*; q=0.01',
+        #            'content-length': '11',
+        #            'accept-encoding': 'gzip, deflate, br'
+        #            }
+        # cookies = {
+        #     'visid_incap_1696314': 'rETeod80SCuEYXU0BeF8ycWsbFwAAAAAQUIPAAAAAADU7XYM6JfhQEDdXNR/1s+k',
+        #     'mt.v': '2.1974058.1550626034561',
+        #     '_ga': 'GA1.2.1726999955.1550626037',
+        #     '_gid': 'GA1.2.1229845563.1550626037',
+        #     '_mkto_trk': 'id:217-TMY-439&token:_mch-tessco.com-1550626038354-87018',
+        #     'liveagent_oref': '',
+        #     'liveagent_ptid': '15d539f3-cca1-44c3-8635-de638b271ea3',
+        #     'visitor': 'db8ce657-ded1-4724-b84f-de7ebe851a6c',
+        #     'coveo_visitorId': 'db8ce657-ded1-4724-b84f-de7ebe851a6c',
+        #     'ASP.NET_SessionId': 'ala2q0vlqdmbwckdsmhcatyt',
+        #     'SC_ANALYTICS_GLOBAL_COOKIE': '162168f863fa49a58281fac7a70da47f|True',
+        #     'liveagent_sid': '09d70f52-a39a-4d34-9f42-0f5e8f4d6958',
+        #     'liveagent_vc': '3',
+        #     '_hjIncludedInSample': '1',
+        #     'incap_ses_443_1696314': 'G7QeehT6ullzMWW/eNslBhXhbFwAAAAALjC2UADe178jdGYFCmFFTw==',
+        #     '_fbp': 'fb.1.1550652135077.1891818976',
+        #     '_biz_uid': 'a11b8515fba740c3e49cfeb6eea46610',
+        #     '_biz_flagsA': '%7B%22Version%22%3A1%2C%22Mkto%22%3A%221%22%2C%22XDomain%22%3A%221%22%7D',
+        #     'incap_ses_360_1696314': 'yoY+C5jw1XsVBDNmqvr+BL1vblwAAAAAXoQP1jsmEcJ/kbslhxUCsg==',
+        #     'incap_ses_435_1696314': 'ti8XE5UcJD7B9DRFgW8JBs93blwAAAAABXDUzkC63ZV1acoQCohOqg==',
+        #     'nlbi_1696314': 'Xc6Fb5w0hFOGyAz1bQd84QAAAAAycLn2bZ3O1iCr5pHwVSWx',
+        #     '_biz_nA': '28',
+        #     '_biz_pendingA': '%5B%5D',
+        #     'incap_ses_524_1696314': 'QTAof1xtYhS5yPX+WaBFB9OMblwAAAAAZBx6eLh1R4AS+jmJHMcNJw==',
+        #     '.ASPXAUTH': '4DA35594D868155A5203B8E6AD7071C40F244ADFC45B203F0B11E55B610C215226305E0182E3CB96CB3DF22296089C706A38EC4258A9767F3E8200D67BE3AC3B266DEFA98E5878D6EA3EB2760E82221947A7801CE39C9E1D62844A80CD56E0502840661AE77A6E942ACCD2C9AD18A91A09D7510611FC4E9707405AB33765CC989E80FAFE4FA86A747C794F79F655C4FC128FE8A8F85EC6921CDF7CF0A580CDA5',
+        #     'AccountNumber': '2537075',
+        #     'PricingTier': '2',
+        #     'MarketCode': '7M',
+        #     'MetaMarketCode': 'RTL',
+        #     'CustomerCreationDate': '2019-02-19T02:02:58-05:00',
+        #     'UserRole': '',
+        #     'TcomRegistrationDate': '',
+        #     'BetaRegistrationDate': '10/21/2017 9:08:15 PM +00:00',
+        #     'previousPage': '/product/261866',
+        #     '_gat_UA-4337606-18': '1',
+        #     '_gat': '1'
+        # }
+        #
+        # try:
+        #     resp = requests.post(stock_url, data=data, cookies=cookies).content
+        #     resp = resp
+        # except Exception as e:
+        #     print(e)
+        # return status
+
+    @staticmethod
+    def _parse_Manufacturer(response):
+
+        manufacturer_info = None
+        assert_specs = response.xpath('//div[contains(@class,"technicalSpecs")]//ul/li')
+        for index, assert_spec in enumerate(assert_specs):
+            spec_field = assert_spec.xpath('./div[@class="col-xs-6 col-sm-4 col-md-3"]/text()').extract()[0]
+            if 'Manufacturer' in spec_field:
+                manufacturer_info = assert_spec.xpath('./div[@class="col-xs-6 col-sm-8 col-md-9"]/text()').extract()
+            else:
+                pass
+        return manufacturer_info[0].strip() if manufacturer_info else None
+
+    @staticmethod
+    def _parse_Length(response):
+
+        length_info = None
+        assert_specs = response.xpath('//div[contains(@class,"technicalSpecs")]//ul/li')
+        for index, assert_spec in enumerate(assert_specs):
+            spec_field = assert_spec.xpath('./div[@class="col-xs-6 col-sm-4 col-md-3"]/text()').extract()[0]
+            if 'Whip Length' in spec_field:
+                length_info = assert_spec.xpath('./div[@class="col-xs-6 col-sm-8 col-md-9"]/text()').extract()
+            else:
+                pass
+        return length_info[0].strip() if length_info else None
+
+    @staticmethod
+    def _parse_ImageURL(response):
+        img_url = response.xpath('//img[@class="currentImage"]/@src').extract()
+        return img_url[0] if img_url else None
