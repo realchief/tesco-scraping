@@ -238,8 +238,8 @@ class TesscoScraper (scrapy.Spider):
         page_number = int(page_count/25)
 
         total_product_urls = []
-        # for page_index in range(0, page_number):
-        for page_index in range(0, 2):
+        for page_index in range(0, page_number):
+        # for page_index in range(0, 2):
 
             first_result_num = str(25*page_index)
             page_content = requests.post(request_url,
@@ -324,8 +324,8 @@ class TesscoScraper (scrapy.Spider):
             product['ImageURL'] = ImageURL
 
 
-
-            yield product
+            if 'https://www.tessco.com/product' in product['Url']:
+                yield product
 
     @staticmethod
     def _parse_CategoryTopology(response):
@@ -379,6 +379,13 @@ class TesscoScraper (scrapy.Spider):
 
     @staticmethod
     def _parse_InStock_OutOfStock(response):
+
+        isOnSale = re.search('isOnSale:(.*?),', response.body).group(1).replace('"', '')
+        if isOnSale == 'False':
+            stockstatus = 'InStock'
+        else:
+            stockstatus = 'Out of Stock'
+        return stockstatus
 
         # sku = re.search('sku: (.*?),', response.body).group(1)
         # status = None
