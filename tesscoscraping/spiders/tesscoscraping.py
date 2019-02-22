@@ -36,7 +36,7 @@ class TesscoScraper (scrapy.Spider):
     START_URL = 'https://www.tessco.com'
     LOGIN_URL = 'https://www.tessco.com/api/tessco/session/login'
     PRODUCT_URL = 'https://www.tessco.com/product/'
-    settings.overrides['ROBOTSTXT_OBEY'] = False
+    # settings.overrides['ROBOTSTXT_OBEY'] = False
     USER_NAME = 'accounting@sellnetny.com'
     PASSWORD = 'Max@302'
 
@@ -238,8 +238,8 @@ class TesscoScraper (scrapy.Spider):
         page_number = int(page_count/25)
 
         total_product_urls = []
-        for page_index in range(0, page_number):
-        # for page_index in range(0, 2):
+        # for page_index in range(0, page_number):
+        for page_index in range(0, 2):
 
             first_result_num = str(25*page_index)
             page_content = requests.post(request_url,
