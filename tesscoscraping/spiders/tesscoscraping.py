@@ -97,13 +97,75 @@ class TesscoScraper (scrapy.Spider):
         searchCategoriesFieldName = re.search('searchCategoriesFieldName = (.*?);', response.body).group(1).replace("'", "")
         indexSourceName = re.search('"indexSourceName" : (.*?) ,', response.body).group(1)
         filterExpression = re.search('"filterExpression" : "(.*?)" ,', response.body).group(1).replace("\\", "")
+        isActiveFieldName = re.search('isActiveFieldName = (.*?);', response.body).group(1).replace("'", "")
         statusFieldName = re.search('statusFieldName = (.*?);', response.body).group(1).replace("'", "")
         isDiscontinuedFieldName = re.search('isDiscontinuedFieldName = (.*?);', response.body).group(1).replace("'", "")
         itemTypeFieldName = re.search('itemTypeFieldName = (.*?);', response.body).group(1).replace("'", "")
         searchSellingRestrictionCodeFieldName = re.search('searchSellingRestrictionCodeFieldName = (.*?);', response.body).group(1).replace("'", "")
         isExposedOnWebFieldName = re.search('isExposedOnWebFieldName = (.*?);', response.body).group(1).replace("'", "")
+        clientLanguageFieldName = re.search('"clientLanguageFieldName" : "(.*?)" ,', response.body).group(1)
+        latestVersionFieldName = re.search('"latestVersionFieldName" : "(.*?)" ,', response.body).group(1)
+        searchTemplateFieldName = re.search('searchTemplateFieldName = (.*?);', response.body).group(1).replace("'", "")
+        searchCategoriesFieldName = re.search('searchCategoriesFieldName = (.*?);', response.body).group(1).replace("'", "")
+        isOnSale_data_field = str(response.xpath('//div[@id="isOnSale"]/@data-field').extract()[0])
+        manufacturerName_data_field = str(response.xpath('//div[@id="manufacturerName"]/@data-field').extract()[0])
+        purchasePlans_data_field = str(response.xpath('//div[@id="purchasePlans"]/@data-field').extract()[0])
+        catitemoperatingvoltage_data_field = str(response.xpath('//div[@id="purchasePlans"]/@data-field').extract()[0])
+        sixthparam = None
+        assert_catitembandwidthst_data_field = response.xpath('//div[@id="catitembandwidthst"]/@data-field').extract()
+        if assert_catitembandwidthst_data_field:
+            sixthparam = str(assert_catitembandwidthst_data_field[0])
+        asssert_catitemmanagedst_data_field = response.xpath('//div[@id="catitemmanagedst"]/@data-field').extract()
+        if asssert_catitemmanagedst_data_field:
+            sixthparam = str(asssert_catitemmanagedst_data_field[0])
+        seventhparam = None
+        assert_catitemnumberofcavitiesst_data_field = response.xpath('//div[@id="catitemfrequencyrangest"]/@data-field').extract()
+        if assert_catitemnumberofcavitiesst_data_field:
+            seventhparam = str(assert_catitemnumberofcavitiesst_data_field[0])
+        assert_catitemwarrantytypest_data_field = response.xpath('//div[@id="catitemwarrantytypest"]/@data-field').extract()
+        if assert_catitemwarrantytypest_data_field:
+            seventhparam = str(assert_catitemnumberofcavitiesst_data_field[0])
 
-        AQ = '(@syssource==({indexSourceName}) {filterExpression}) (@fstatus51937<>ObsoleteOutOfStock) ({isDiscontinuedFieldName}==0) ({isExposedOnWebFieldName}==(1,Yes)) ({itemTypeFieldName}<>(LABOR,PRICING)) ({searchSellingRestrictionCodeFieldName}==("N/A",1MPH,ADOP,AKGS,AUGL,BAN5,BAN6,BINA,BLUE,BODZ,BOND,BRTH,BRVN,C100,CANO,CL3M,CMEC,CMES,CRIK,DEMO,DSP2,ELEM,ELIT,EVUT,EXA1,FRT1,FTTH,GEAR,GHCC,GIGA,GOLF,GOOG,GR4B,GRFN,HOLD,HUAW,IBLT,ICOM,INCP,INHC,JABR,JAWB,JLAB,KING,KRNZ,KSC2,LAND,LFLX,LIFE,LIFP,MACZ,METR,METT,MOSH,MSFT,MSII,MSIO,MUSE,MWLN,MYCH,NATU,NEET,NEST,NOMA,NONO,NSC1,NSC2,NSC3,NSC4,OBSS,OTTC,PLNA,PLNB,POPS,PRRT,RAJ,RAJ1,RDL1,REPS,SAMA,SAMC,SAMD,SAMM,SAMX,SC15,SCOS,SENA,SKEC,SKUL,SLC,SOLR,SONA,SONX,SPAW,SPCK,SPEL,SPHM,SQRE,SSC2,SSC3,STAY,SUIT,SWCM,TEDB,TMOB,TMTM,TNL1,TWEL,UAGR,URBN,VINE,VNV1,VOIP,WEMO,ZEPP,ZIK1)) ({searchCategoriesFieldName}*="37438020-f6f0-53af-3975-d03404e8aed4*")'\
+        eightthparam = None
+        assert_catitemaveragepowerhandlingst_data_field = response.xpath('//div[@id="catitemaveragepowerhandlingst"]/@data-field').extract()
+        if assert_catitemaveragepowerhandlingst_data_field:
+            eightthparam = str(assert_catitemaveragepowerhandlingst_data_field[0])
+
+        catitemrfinputconnectorst_data_field = str(response.xpath('//div[@id="catitemrfinputconnectorst"]/@data-field').extract()[0])
+        catitemcavitysizest_data_field = str(response.xpath('//div[@id="catitemcavitysizest"]/@data-field').extract()[0])
+        catitemoutdoorratedst_data_field = str(response.xpath('//div[@id="catitemoutdoorratedst"]/@data-field').extract()[0])
+        catitemrxrxisolationst_data_field = str(response.xpath('//div[@id="catitemrxrxisolationst"]/@data-field').extract()[0])
+        catitemmaximumvswrst_data_field = str(response.xpath('//div[@id="catitemmaximumvswrst"]/@data-field').extract()[0])
+        catitemminimumisolationst_data_field = str(response.xpath('//div[@id="catitemminimumisolationst"]/@data-field').extract()[0])
+        catitemmaximumpowerinputst_data_field = str(response.xpath('//div[@id="catitemmaximumpowerinputst"]/@data-field').extract()[0])
+        catitemrfconnectorst_data_field = str(response.xpath('//div[@id="catitemrfconnectorst"]/@data-field').extract()[0])
+        catitemdcinputvoltagest_data_field = str(response.xpath('//div[@id="catitemdcinputvoltagest"]/@data-field').extract()[0])
+        catitemsystemgaindb_data_field = str(response.xpath('//div[@id="catitemsystemgaindb"]/@data-field').extract()[0])
+        catitemchannelseperationst_data_field = str(response.xpath('//div[@id="catitemchannelseperationst"]/@data-field').extract()[0])
+        catitemmaximumpowerst_data_field = str(response.xpath('//div[@id="catitemmaximumpowerst"]/@data-field').extract()[0])
+        catitemcavitytypest_data_field = str(response.xpath('//div[@id="catitemcavitytypest"]/@data-field').extract()[0])
+        catitemrfoutputconnectorst_data_field = str(response.xpath('//div[@id="catitemrfoutputconnectorst"]/@data-field').extract()[0])
+        catitemnumberofchannelsst_data_field = str(response.xpath('//div[@id="catitemnumberofchannelsst"]/@data-field').extract()[0])
+        catitempimtypicalst_data_field = str(response.xpath('//div[@id="catitempimtypicalst"]/@data-field').extract()[0])
+        catiteminsertionlossrangest_data_field = str(response.xpath('//div[@id="catiteminsertionlossrangest"]/@data-field').extract()[0])
+        catitemantennacontrolprotocolst_data_field = str(response.xpath('//div[@id="catitemantennacontrolprotocolst"]/@data-field').extract()[0])
+        catitemtuningmethod_data_field = str(response.xpath('//div[@id="catitemtuningmethod"]/@data-field').extract()[0])
+        catitemforwardpowerscalest_data_field = str(response.xpath('//div[@id="catitemforwardpowerscalest"]/@data-field').extract()[0])
+        catitemspecificfrequencyst_data_field = str(response.xpath('//div[@id="catitemspecificfrequencyst"]/@data-field').extract()[0])
+        catitembandssupportedst_data_field = str(response.xpath('//div[@id="catitembandssupportedst"]/@data-field').extract()[0])
+        catitemnominalinsertionlossst_data_field = str(response.xpath('//div[@id="catitemnominalinsertionlossst"]/@data-field').extract()[0])
+        catitemrfconnectorsst_data_field = str(response.xpath('//div[@id="catitemrfconnectorsst"]/@data-field').extract()[0])
+        catitempowerperchannelst_data_field = str(response.xpath('//div[@id="catitempowerperchannelst"]/@data-field').extract()[0])
+        catitemreturnlossst_data_field = str(response.xpath('//div[@id="catitemreturnlossst"]/@data-field').extract()[0])
+        catitempowermonitortypest_data_field = str(response.xpath('//div[@id="catitempowermonitortypest"]/@data-field').extract()[0])
+        catitemminimumseparationst_data_field = str(response.xpath('//div[@id="catitemminimumseparationst"]/@data-field').extract()[0])
+        catitemreversepowerscalest_data_field = str(response.xpath('//div[@id="catitemreversepowerscalest"]/@data-field').extract()[0])
+        catitemsensordcconnectorst_data_field = str(response.xpath('//div[@id="catitemsensordcconnectorst"]/@data-field').extract()[0])
+        catitemgainrx_data_field = str(response.xpath('//div[@id="catitemgainrx"]/@data-field').extract()[0])
+        availableDate_data_field = str(response.xpath('//div[@id="availableDate"]/@data-field').extract()[0])
+
+
+        AQ = '(@syssource==({indexSourceName}) {filterExpression}) (@fstatus51937<>ObsoleteOutOfStock) ({isDiscontinuedFieldName}==0) ({isExposedOnWebFieldName}==(1,Yes)) ({itemTypeFieldName}<>(LABOR,PRICING)) ({searchSellingRestrictionCodeFieldName}==("N/A",1MPH,ADOP,AKGS,AUGL,BAN5,BAN6,BINA,BLUE,BODZ,BOND,BRTH,BRVN,C100,CANO,CL3M,CMEC,CMES,CRIK,DEMO,DSP2,ELEM,ELIT,EVUT,EXA1,FRT1,FTTH,GEAR,GHCC,GIGA,GOLF,GOOG,GR4B,GRFN,HOLD,HUAW,IBLT,ICOM,INCP,INHC,JABR,JAWB,JLAB,KING,KRNZ,KSC2,LAND,LFLX,LIFE,LIFP,MACZ,METR,METT,MOSH,MSFT,MSII,MSIO,MUSE,MWLN,MYCH,NATU,NEET,NEST,NOMA,NONO,NSC1,NSC2,NSC3,NSC4,OBSS,OTTC,PLNA,PLNB,POPS,PRRT,RAJ,RAJ1,RDL1,REPS,SAMA,SAMC,SAMD,SAMM,SAMX,SC15,SCOS,SENA,SKEC,SKUL,SLC,SOLR,SONA,SONX,SPAW,SPCK,SPEL,SPHM,SQRE,SSC2,SSC3,STAY,SUIT,SWCM,TEDB,TMOB,TMTM,TNL1,TWEL,UAGR,URBN,VINE,VNV1,VOIP,WEMO,ZEPP,ZIK1)) ({searchCategoriesFieldName}*="{category_id}*")'\
             .format(indexSourceName=indexSourceName,
                     filterExpression=filterExpression,
                     isDiscontinuedFieldName=isDiscontinuedFieldName,
@@ -111,116 +173,101 @@ class TesscoScraper (scrapy.Spider):
                     itemTypeFieldName=itemTypeFieldName,
                     searchSellingRestrictionCodeFieldName=searchSellingRestrictionCodeFieldName,
                     searchCategoriesFieldName=searchCategoriesFieldName,
+                    category_id=category_id
                     )
 
-        CQ = '(({clientLanguageFieldName}=="en" {latestVersionFieldName}=="1")) ({searchTemplateFieldName}==Product) ' \
-             '({isActiveFieldName}==1)'\
-            .format(clientLanguageFieldName = clientLanguageFieldName,
-                    latestVersionFieldName = latestVersionFieldName,
-                    searchTemplateFieldName = searchTemplateFieldName,
-                    isActiveFieldName = isActiveFieldName,
+        CQ = '(({clientLanguageFieldName}=="en" {latestVersionFieldName}=="1")) ({searchTemplateFieldName}==Product) ({isActiveFieldName}==1)'\
+            .format(clientLanguageFieldName=clientLanguageFieldName,
+                    latestVersionFieldName=latestVersionFieldName,
+                    searchTemplateFieldName=searchTemplateFieldName,
+                    isActiveFieldName=isActiveFieldName
                     )
 
-        GROUP_BY = '[{"field":"%s","maximumNumberOfValues":1000,"sortCriteria":"occurrences",' \
-                   '"injectionDepth":1000,"completeFacetWithStandardValues":true},{"field":"%s",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":false,"allowedValues":["Yes"]},{"field":"@fmanufacturername51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fpurchaseplans51937","maximumNumberOfValues":6,' \
-                   '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
-                   '{"field":"@fcatitemrfconnectorbodystylest51937","maximumNumberOfValues":6,"sortCriteria":' \
-                   '"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
-                   '{"field":"@fcatitemwiregaugest51937","maximumNumberOfValues":6,"sortCriteria":"alphaAscending",' \
-                   '"injectionDepth":10000,"completeFacetWithStandardValues":true},{"field":"@fcatitemconfiguration51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemvolumecapacityminimumst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemvopst51937","maximumNumberOfValues":6,' \
-                   '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
-                   '{"field":"@fcatitemouterconductormaterialst51937","maximumNumberOfValues":6,' \
-                   '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
-                   '{"field":"@fcatitemshieldedst51937","maximumNumberOfValues":6,"sortCriteria":"alphaAscending",' \
-                   '"injectionDepth":10000,"completeFacetWithStandardValues":true},' \
-                   '{"field":"@fcatitemoutercontactattachtypest51937","maximumNumberOfValues":6,' \
-                   '"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
-                   '{"field":"@fcatitemfireratingst51937","maximumNumberOfValues":6,"sortCriteria":"alphaAscending",' \
-                   '"injectionDepth":10000,"completeFacetWithStandardValues":true},{"field":"@fcatitemarmoredst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcontactsurface51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcolorst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemfinish51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemjacketcolorst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemnetworkconnectorsst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemrfconnectorst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcablemanufacturerst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcablesiz122xest51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemmaterialpin51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcoaz120xialcableseriesst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitembodyattachmentst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemjacketmaterialst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemminimumbendradinsst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemjumperlengthst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemrfimpedancest51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemfireretardantst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemconnector1manufacturerst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemctrconductorconstructionst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemconnector2manufacturerst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemvolumecapacitymaz120ximumst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitembodymaterialst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatiteminsulatormaterialst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemrfconnectorsst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcabletypest51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemlowpimst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemacinputvoltagest51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemenvironmentst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemvoltagetype51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemnetworkcategoryst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemminimumbendradopst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemuvresistantst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcablelengthst51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@fcatitemcenterpintypest51937",' \
-                   '"maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true},{"field":"@favailabledate51937",' \
-                   '"maximumNumberOfValues":3,"sortCriteria":"occurrences","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true,"rangeValues":[{"start":"2018-12-21T23:00:00.000Z",' \
-                   '"end":"2999-12-31T22:59:59.999Z","label":"60 Days","endInclusive":false},' \
-                   '{"start":"2018-11-21T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z","label":"90 Days",' \
-                   '"endInclusive":false},{"start":"1969-12-31T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z",' \
-                   '"label":"All","endInclusive":false}]},{"field":"@fbrandmodelhierarchy51937",' \
-                   '"maximumNumberOfValues":10001,"sortCriteria":"alphaAscending","injectionDepth":10000,' \
-                   '"completeFacetWithStandardValues":true}]' % (searchCategoriesFieldName, data_field)
+
+        GROUP_BY = '[{"field":"%s","maximumNumberOfValues":1000,"sortCriteria":"occurrences","injectionDepth":1000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":false,"allowedValues":["Yes"]},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":6,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true},' \
+                   '{"field":"%s","maximumNumberOfValues":3,"sortCriteria":"occurrences","injectionDepth":10000,"completeFacetWithStandardValues":true,"rangeValues":[{"start":"2018-12-30T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z","label":"60 Days","endInclusive":false},{"start":"2018-11-30T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z","label":"90 Days","endInclusive":false},{"start":"1969-12-31T23:00:00.000Z","end":"2999-12-31T22:59:59.999Z","label":"All","endInclusive":false}]},{"field":"@fbrandmodelhierarchy51937","maximumNumberOfValues":10001,"sortCriteria":"alphaAscending","injectionDepth":10000,"completeFacetWithStandardValues":true}]'\
+                   % (searchCategoriesFieldName,
+                      isOnSale_data_field,
+                      manufacturerName_data_field,
+                      purchasePlans_data_field,
+                      catitemoperatingvoltage_data_field,
+                      sixthparam,
+                      seventhparam,
+                      eightthparam,
+                      catitemrfinputconnectorst_data_field,
+                      catitemcavitysizest_data_field,
+                      catitemoutdoorratedst_data_field,
+                      catitemrxrxisolationst_data_field,
+                      catitemmaximumvswrst_data_field,
+                      catitemminimumisolationst_data_field,
+                      catitemmaximumpowerinputst_data_field,
+                      catitemrfconnectorst_data_field,
+                      catitemdcinputvoltagest_data_field,
+                      catitemnumberofcavitiesst_data_field,
+                      catitemsystemgaindb_data_field,
+                      catitemchannelseperationst_data_field,
+                      catitemmaximumpowerst_data_field,
+                      catitemcavitytypest_data_field,
+                      catitemrfoutputconnectorst_data_field,
+                      catitemnumberofchannelsst_data_field,
+                      catitempimtypicalst_data_field,
+                      catiteminsertionlossrangest_data_field,
+                      catitemantennacontrolprotocolst_data_field,
+                      catitemtuningmethod_data_field,
+                      catitemforwardpowerscalest_data_field,
+                      catitemspecificfrequencyst_data_field,
+                      catitembandssupportedst_data_field,
+                      catitemnominalinsertionlossst_data_field,
+                      catitemrfconnectorsst_data_field,
+                      catitempowerperchannelst_data_field,
+                      catitemreturnlossst_data_field,
+                      catitempowermonitortypest_data_field,
+                      catitemminimumseparationst_data_field,
+                      catitemreversepowerscalest_data_field,
+                      catitemsensordcconnectorst_data_field,
+                      catitemgainrx_data_field,
+                      availableDate_data_field
+                      )
+
 
         sitecoreItemUri = re.search('"sitecoreItemUri" : "(.*?)" ,', response.body).group(1)
         request_url = 'https://www.tessco.com/coveo/rest/v2/?sitecoreItemUri={sitecoreItemUri}&siteName=TesscoCommerce'\
