@@ -480,65 +480,6 @@ class TesscoScraper (scrapy.Spider):
             stockstatus = 'Out of Stock'
         return stockstatus
 
-        # sku = re.search('sku: (.*?),', response.body).group(1)
-        # status = None
-        # data = {'sku': sku}
-        # stock_url = 'https://www.tessco.com/api/tessco/inventory/getproductavailability'
-        # headers = {'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        #            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36',
-        #            'referer': response.url,
-        #            'x-requested-with': 'XMLHttpRequest',
-        #            'origin': 'https://www.tessco.com',
-        #            'accept': 'application/json, text/javascript, */*; q=0.01',
-        #            'content-length': '11',
-        #            'accept-encoding': 'gzip, deflate, br'
-        #            }
-        # cookies = {
-        #     'visid_incap_1696314': 'rETeod80SCuEYXU0BeF8ycWsbFwAAAAAQUIPAAAAAADU7XYM6JfhQEDdXNR/1s+k',
-        #     'mt.v': '2.1974058.1550626034561',
-        #     '_ga': 'GA1.2.1726999955.1550626037',
-        #     '_gid': 'GA1.2.1229845563.1550626037',
-        #     '_mkto_trk': 'id:217-TMY-439&token:_mch-tessco.com-1550626038354-87018',
-        #     'liveagent_oref': '',
-        #     'liveagent_ptid': '15d539f3-cca1-44c3-8635-de638b271ea3',
-        #     'visitor': 'db8ce657-ded1-4724-b84f-de7ebe851a6c',
-        #     'coveo_visitorId': 'db8ce657-ded1-4724-b84f-de7ebe851a6c',
-        #     'ASP.NET_SessionId': 'ala2q0vlqdmbwckdsmhcatyt',
-        #     'SC_ANALYTICS_GLOBAL_COOKIE': '162168f863fa49a58281fac7a70da47f|True',
-        #     'liveagent_sid': '09d70f52-a39a-4d34-9f42-0f5e8f4d6958',
-        #     'liveagent_vc': '3',
-        #     '_hjIncludedInSample': '1',
-        #     'incap_ses_443_1696314': 'G7QeehT6ullzMWW/eNslBhXhbFwAAAAALjC2UADe178jdGYFCmFFTw==',
-        #     '_fbp': 'fb.1.1550652135077.1891818976',
-        #     '_biz_uid': 'a11b8515fba740c3e49cfeb6eea46610',
-        #     '_biz_flagsA': '%7B%22Version%22%3A1%2C%22Mkto%22%3A%221%22%2C%22XDomain%22%3A%221%22%7D',
-        #     'incap_ses_360_1696314': 'yoY+C5jw1XsVBDNmqvr+BL1vblwAAAAAXoQP1jsmEcJ/kbslhxUCsg==',
-        #     'incap_ses_435_1696314': 'ti8XE5UcJD7B9DRFgW8JBs93blwAAAAABXDUzkC63ZV1acoQCohOqg==',
-        #     'nlbi_1696314': 'Xc6Fb5w0hFOGyAz1bQd84QAAAAAycLn2bZ3O1iCr5pHwVSWx',
-        #     '_biz_nA': '28',
-        #     '_biz_pendingA': '%5B%5D',
-        #     'incap_ses_524_1696314': 'QTAof1xtYhS5yPX+WaBFB9OMblwAAAAAZBx6eLh1R4AS+jmJHMcNJw==',
-        #     '.ASPXAUTH': '4DA35594D868155A5203B8E6AD7071C40F244ADFC45B203F0B11E55B610C215226305E0182E3CB96CB3DF22296089C706A38EC4258A9767F3E8200D67BE3AC3B266DEFA98E5878D6EA3EB2760E82221947A7801CE39C9E1D62844A80CD56E0502840661AE77A6E942ACCD2C9AD18A91A09D7510611FC4E9707405AB33765CC989E80FAFE4FA86A747C794F79F655C4FC128FE8A8F85EC6921CDF7CF0A580CDA5',
-        #     'AccountNumber': '2537075',
-        #     'PricingTier': '2',
-        #     'MarketCode': '7M',
-        #     'MetaMarketCode': 'RTL',
-        #     'CustomerCreationDate': '2019-02-19T02:02:58-05:00',
-        #     'UserRole': '',
-        #     'TcomRegistrationDate': '',
-        #     'BetaRegistrationDate': '10/21/2017 9:08:15 PM +00:00',
-        #     'previousPage': '/product/261866',
-        #     '_gat_UA-4337606-18': '1',
-        #     '_gat': '1'
-        # }
-        #
-        # try:
-        #     resp = requests.post(stock_url, data=data, cookies=cookies).content
-        #     resp = resp
-        # except Exception as e:
-        #     print(e)
-        # return status
-
     @staticmethod
     def _parse_Manufacturer(response):
 
